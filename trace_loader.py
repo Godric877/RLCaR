@@ -10,7 +10,7 @@ def load_traces(trace, cache_size, rnd):
         print('Load #%i trace for cache size of %i' % (rnd, cache_size))
 
         # load time, request id, request size
-        df = pd.read_csv(trace_folder + 'test_trace/test_30'  + '.tr', sep=' ', header=None)
+        df = pd.read_csv(trace_folder + 'test_trace/small'  + '.tr', sep=' ', header=None)
         # remaining cache size, object last access time
         df[3], df[4] = cache_size, 0
 

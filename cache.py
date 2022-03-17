@@ -15,7 +15,7 @@ accept = 1
 reject = 0
 
 cache_unseen_default = 500
-cache_size_default = 128
+cache_size_default = 1
 cache_trace_default = "test"
 
 
