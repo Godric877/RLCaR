@@ -15,7 +15,7 @@ accept = 1
 reject = 0
 
 cache_unseen_default = 500
-cache_size_default = 1
+cache_size_default = 20
 cache_trace_default = "test"
 
 
@@ -250,12 +250,12 @@ class CacheEnv():
         # reset environment (generate new jobs)
         self.reset(1, 2)
 
-    def reset(self, low=0, high=1000):
-        new_trace = np.random.randint(low, high)
-        self.src.reset(new_trace)
+    def reset(self, trace_index, low=0, high=1000):
+        #new_trace = np.random.randint(low, high)
+        self.src.reset(trace_index)
         self.sim.reset()
         if cache_trace_default == 'test':
-            print("New Env Start", new_trace)
+            print("New Env Start", trace_index)
         elif cache_trace_default == 'real':
             print("New Env Start Real")
         return self.sim.get_state()
@@ -279,7 +279,7 @@ class CacheEnv():
             obj, done = self.src.next()
 
         obs = self.sim.get_state(obj)
-        info = {}
+        #info = {}
         return obs, reward, done, info
 
     def render(self, mode='human', close=False):

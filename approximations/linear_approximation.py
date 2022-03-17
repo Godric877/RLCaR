@@ -1,4 +1,4 @@
-from state_value_approximation import StateValueApproximation
+from approximations.state_value_approximation import StateValueApproximation
 import torch
 from torch import nn
 from collections import OrderedDict
@@ -30,7 +30,9 @@ class LinearApproximation(StateValueApproximation):
             self.create_model()
 
         def get_input(self, s, a):
-            return torch.tensor(s + a)
+            if type(a) == int:
+                act = [a]
+            return torch.tensor(s + act)
 
         def __call__(self, s, a):
             # TODO: implement this method
