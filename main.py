@@ -32,19 +32,19 @@ def semi_gradient_sarsa_with_linear_approx(env, train, test):
     L = LinearApproximation(3, 2, alpha)
     semi_gradient_sarsa(env, gamma, alpha, L, epsilon, train, actions)
     rewards, bhr = semi_gradient_sarsa(env, gamma, alpha, L, epsilon, test, actions)
-    get_metrics(test, 0, rewards, bhr, "semi_gradient_sarsa.png")
+    get_metrics(test, 0, rewards, bhr, "experiments/graphs/semi_gradient_sarsa.png")
 
 def run_lru(env, train, test):
     lru(env, train)
     rewards, bhr = lru(env, test)
-    get_metrics(test, 0, rewards, bhr , "lru.png")
+    get_metrics(test, 0, rewards, bhr, "experiments/graphs/lru.png")
 
 if __name__ == "__main__":
     env = CacheEnv()
-    num_episodes = 5
+    num_episodes = 20
     episodes = np.arange(num_episodes)
     train, test = train_test_split(episodes, test_size=0.2)
-    run_lru(env, train, test)
+    #run_lru(env, train, test)
     semi_gradient_sarsa_with_linear_approx(env, train, test)
 
 

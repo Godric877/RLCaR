@@ -3,7 +3,7 @@ import pandas as pd
 from collections import Counter, defaultdict, OrderedDict
 import heapq
 from gym import spaces
-
+from replacement_agent import ReplacementAgent
 
 from trace_loader import load_traces
 
@@ -19,25 +19,25 @@ cache_unseen_default = 500
 cache_size_default = 20
 cache_trace_default = "test"
 
-class LRUCache:
-
-    def __init__(self, capacity: int):
-        self.capacity = capacity
-        self.cache=OrderedDict()
-
-    def get(self, key: int) -> int:
-        if key in self.cache:
-            self.cache.move_to_end(key)
-            return self.cache[key]
-        else:
-            return -1
-
-    def remove(self):
-        return self.cache.popitem(last=False)
-
-    def put(self, key: int, value : int) -> None:
-        self.cache[key]=value
-        self.cache.move_to_end(key)
+# class LRUCache:
+#
+#     def __init__(self, capacity: int):
+#         self.capacity = capacity
+#         self.cache=OrderedDict()
+#
+#     def get(self, key: int) -> int:
+#         if key in self.cache:
+#             self.cache.move_to_end(key)
+#             return self.cache[key]
+#         else:
+#             return -1
+#
+#     def remove(self):
+#         return self.cache.popitem(last=False)
+#
+#     def put(self, key: int, value : int) -> None:
+#         self.cache[key]=value
+#         self.cache.move_to_end(key)
 
 
 class TraceSrc(object):
@@ -108,7 +108,8 @@ class CacheSim(object):
         self.non_cache = defaultdict(list)
         self.cache = defaultdict(list)  # requested items with caching
         self.cache_pq = []
-        self.lru_cache = LRUCache(self.cache_size)
+        # self.lru_cache = LRUCache(self.cache_size)
+        self.agent = ReplacementAgent(capacity=self.cache_size, policies=["LRU"])
         self.cache_remain = self.cache_size
         self.count_ohr = 0
         self.count_bhr = 0
@@ -123,7 +124,7 @@ class CacheSim(object):
         self.count_ohr = 0
         self.count_bhr = 0
         self.size_all = 0
-        self.lru_cache = LRUCache(self.cache_size)
+        self.agent = ReplacementAgent(capacity=self.cache_size, policies=["LRU"])
 
     def step(self, action, obj):
         req = self.req
@@ -155,7 +156,7 @@ class CacheSim(object):
                 self.count_ohr += 1
                 hit = 1
                 cost += obj_size
-                self.lru_cache.get(obj_id)
+                self.agent.update(obj_id, obj_size)
 
             #  If not hit
             except IndexError:
@@ -170,7 +171,7 @@ class CacheSim(object):
                         # discard_obj_if_admit.append(rm_id)
                         # heapq.heappop(self.cache_pq)
                         # del self.cache[rm_id]
-                        rm_id, size = self.lru_cache.remove()
+                        rm_id, size = self.agent.remove()
                         #print("rm_id = ",rm_id, " size = ", size)
                         cache_size_online_remain += size
                         cost += size
@@ -181,7 +182,7 @@ class CacheSim(object):
                         # add into cache
                     self.cache[obj_id] = [obj_size, req]
                     # heapq.heappush(self.cache_pq, (obj_size, obj_id))
-                    self.lru_cache.put(obj_id, obj_size)
+                    self.agent.put(obj_id, obj_size)
                     cache_size_online_remain -= obj_size
 
                     # cost value is based on size, can be changed
