@@ -19,26 +19,6 @@ cache_unseen_default = 500
 cache_size_default = 20
 cache_trace_default = "test"
 
-# class LRUCache:
-#
-#     def __init__(self, capacity: int):
-#         self.capacity = capacity
-#         self.cache=OrderedDict()
-#
-#     def get(self, key: int) -> int:
-#         if key in self.cache:
-#             self.cache.move_to_end(key)
-#             return self.cache[key]
-#         else:
-#             return -1
-#
-#     def remove(self):
-#         return self.cache.popitem(last=False)
-#
-#     def put(self, key: int, value : int) -> None:
-#         self.cache[key]=value
-#         self.cache.move_to_end(key)
-
 
 class TraceSrc(object):
     '''
@@ -109,11 +89,13 @@ class CacheSim(object):
         self.cache = defaultdict(list)  # requested items with caching
         self.cache_pq = []
         # self.lru_cache = LRUCache(self.cache_size)
-        self.agent = ReplacementAgent(capacity=self.cache_size, policies=["LRU"])
+        self.agent = ReplacementAgent(capacity=self.cache_size, policies=["LRU","LFU","FIFO"])
         self.cache_remain = self.cache_size
         self.count_ohr = 0
         self.count_bhr = 0
         self.size_all = 0
+        self.object_frequency = Counter()
+        self.object_average_interarrival = Counter()
 
     def reset(self):
         self.req = 0
@@ -124,7 +106,9 @@ class CacheSim(object):
         self.count_ohr = 0
         self.count_bhr = 0
         self.size_all = 0
-        self.agent = ReplacementAgent(capacity=self.cache_size, policies=["LRU"])
+        self.agent.reset()
+        self.object_frequency = Counter()
+        self.object_average_interarrival = Counter()
 
     def step(self, action, obj):
         req = self.req
@@ -132,6 +116,8 @@ class CacheSim(object):
         cache_size_online_remain = self.cache_remain
         discard_obj_if_admit = []
         obj_time, obj_id, obj_size = obj[0], obj[1], obj[2]
+        self.object_frequency[obj_id] += 1
+
 
         # create the current state for cache simulator
         cost = 0
@@ -204,6 +190,16 @@ class CacheSim(object):
         # print("debug:", bhr, ohr)
         reward = hit * cost
 
+        if self.object_frequency[obj_id] != 1:
+            new_count = self.object_frequency[obj_id] - 1
+            cur_avg = self.object_average_interarrival[obj_id]
+            try:
+                last_interarrival = self.req - self.cache[obj_id][1]
+            except IndexError:
+                    last_interarrival = self.req - self.non_cache[obj_id][1]
+            new_avg = cur_avg + (last_interarrival - cur_avg)/new_count
+            self.object_average_interarrival[obj_id] = new_avg
+
         self.req += 1
         self.cache_remain = cache_size_online_remain
 
@@ -235,7 +231,8 @@ class CacheSim(object):
             except IndexError:
                 # Unseen objects (not in non_cache or cache) are assigned this recency constant
                 req = cache_unseen_default
-        state = [obj_size, self.cache_remain, req]
+        state = [obj_size, self.cache_remain, req, self.object_frequency[obj_id],
+                 self.object_average_interarrival[obj_id]]
 
         return state
 

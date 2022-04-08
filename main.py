@@ -29,7 +29,7 @@ def semi_gradient_sarsa_with_linear_approx(env, train, test):
     actions = [0, 1]
     gamma = 1
     alpha = 0.01
-    L = LinearApproximation(3, 2, alpha)
+    L = LinearApproximation(4, 2, alpha)
     semi_gradient_sarsa(env, gamma, alpha, L, epsilon, train, actions)
     rewards, bhr = semi_gradient_sarsa(env, gamma, alpha, L, epsilon, test, actions)
     get_metrics(test, 0, rewards, bhr, "experiments/graphs/semi_gradient_sarsa.png")

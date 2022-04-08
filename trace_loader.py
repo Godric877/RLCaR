@@ -13,7 +13,7 @@ def load_traces(trace, cache_size, rnd):
         df = pd.read_csv(trace_folder + 'test_trace/test_' + str(rnd)  + '.tr', sep=' ', header=None)
         # remaining cache size, object last access time
         df[3], df[4] = cache_size, 0
-        #df[2] = 1
+        df[2] = 1
 
     elif trace == 'real':
        df = []

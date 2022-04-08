@@ -1,21 +1,20 @@
-from collections import OrderedDict, Counter
+from collections import Counter
 from replacement_policies.policy_base import PolicyBase
 
-class LRUCache(PolicyBase):
+class FifoCache(PolicyBase):
 
     def __init__(self, capacity: int):
         self.capacity = capacity
-        self.cache=OrderedDict()
+        self.cache_stack = []
+        self.value_dict = {}
         self.history = []
         self.history_dict = Counter()
 
-    def update(self, key: int, val : int):
-        self.cache.move_to_end(key)
-        is_present = (key in self.history_dict)
-        return is_present
+    def update(self, key: int, val: int):
+        return (key in self.history_dict)
 
     def get_remove_candidate(self):
-        return next(iter(self.cache))
+        return self.cache_stack[-1]
 
     def update_history(self):
         candidate = self.get_remove_candidate()
@@ -30,20 +29,25 @@ class LRUCache(PolicyBase):
 
     def remove(self):
         self.update_history()
-        return self.cache.popitem(last=False)
+        key = self.cache_stack.pop()
+        val = self.value_dict[key]
+        del self.value_dict[key]
+        return key ,val
 
     def put(self, key: int, value : int) -> None:
-        if len(self.cache) >= self.capacity:
+        if len(self.cache_stack) >= self.capacity:
             self.remove()
-        self.cache[key]=value
-        self.cache.move_to_end(key)
+        self.cache_stack.append(key)
+        self.value_dict[key] = value
 
     def remove_key(self, key):
         self.update_history()
-        if key in self.cache:
-            del self.cache[key]
+        if key in self.cache_stack:
+            self.cache_stack.remove(key)
+            del self.value_dict[key]
 
     def reset(self):
-        self.cache = OrderedDict()
+        self.cache_stack = []
+        self.value_dict = {}
         self.history = []
         self.history_dict = Counter()
