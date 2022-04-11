@@ -2,7 +2,7 @@ from cache import CacheEnv
 import matplotlib.pyplot as plt
 import numpy as np
 from algorithms.semi_gradient_sarsa_algorithm import semi_gradient_sarsa
-from algorithms.LRU import lru
+from algorithms.Deterministic import always_evict
 from approximations.linear_approximation import LinearApproximation
 from sklearn.model_selection import train_test_split
 
@@ -34,24 +34,24 @@ def semi_gradient_sarsa_with_linear_approx(env, train, test):
     rewards, bhr = semi_gradient_sarsa(env, gamma, alpha, L, epsilon, test, actions)
     get_metrics(test, 0, rewards, bhr, "experiments/graphs/semi_gradient_sarsa.png")
 
-def run_lru(env, train, test):
-    lru(env, train)
-    rewards, bhr = lru(env, test)
+def run_always_evict(env, train, test):
+    always_evict(env, train)
+    rewards, bhr = always_evict(env, test)
     get_metrics(test, 0, rewards, bhr, "experiments/graphs/lru.png")
 
 if __name__ == "__main__":
-    env = CacheEnv()
     num_episodes = 20
     episodes = np.arange(num_episodes)
     train, test = train_test_split(episodes, test_size=0.2)
-    #run_lru(env, train, test)
+
+    policies = ["LFU", "LRU"]
+    env = CacheEnv(policies)
     semi_gradient_sarsa_with_linear_approx(env, train, test)
 
+    for policy in policies:
+        env = CacheEnv([policy])
+        print("Policy used: ", policy)
+        semi_gradient_sarsa_with_linear_approx(env, train, test)
 
-
-
-
-
-
-
-
+    env = CacheEnv(["LRU"])
+    run_always_evict(env, train, test)

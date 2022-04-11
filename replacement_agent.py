@@ -12,11 +12,12 @@ class ReplacementAgent:
         self.policies = policies
         self.experts = []
         self.num_experts = len(policies)
-        self.experts.append(LRUCache(capacity))
         self.current_expert = 0
         self.hit_reward = 1
         self.miss_reward = -0.5
         self.epsilon = 0.1
+        if "LRU" in policies:
+            self.experts.append(LRUCache(capacity))
         if "LFU" in policies:
             self.experts.append(LFUCache(capacity))
         if "FIFO" in policies:
@@ -33,10 +34,10 @@ class ReplacementAgent:
                 self.reward[index] = self.miss_reward
             else:
                 self.reward[index] = self.hit_reward
-        self.weight_update()
+        if(self.num_experts > 1):
+            self.weight_update()
 
     def remove(self):
-        #print(self.weights)
         current_expert = int(np.random.choice(np.arange(self.num_experts), 1, p=self.weights/np.sum(self.weights)))
         key ,val = self.experts[current_expert].remove()
         for i in range(self.num_experts):

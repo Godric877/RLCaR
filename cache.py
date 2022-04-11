@@ -65,7 +65,7 @@ class TraceSrc(object):
 
 
 class CacheSim(object):
-    def __init__(self, cache_size, policy, action_space, state_space):
+    def __init__(self, cache_size, policy, action_space, state_space, replacement_policies):
         # invariant
         '''
         This is the simulater for the cache.
@@ -89,7 +89,7 @@ class CacheSim(object):
         self.cache = defaultdict(list)  # requested items with caching
         self.cache_pq = []
         # self.lru_cache = LRUCache(self.cache_size)
-        self.agent = ReplacementAgent(capacity=self.cache_size, policies=["LRU","LFU","FIFO"])
+        self.agent = ReplacementAgent(capacity=self.cache_size, policies=replacement_policies)
         self.cache_remain = self.cache_size
         self.count_ohr = 0
         self.count_bhr = 0
@@ -258,7 +258,7 @@ class CacheEnv():
     * REFERENCE *
     """
 
-    def __init__(self, seed=42):
+    def __init__(self, replacement_policies, seed=42):
         self.seed(seed)
         self.cache_size = cache_size_default
 
@@ -275,7 +275,8 @@ class CacheEnv():
         self.sim = CacheSim(cache_size=self.cache_size, \
                             policy='lru', \
                             action_space=self.action_space, \
-                            state_space=self.observation_space)
+                            state_space=self.observation_space,
+                            replacement_policies=replacement_policies)
 
         # reset environment (generate new jobs)
         self.reset(1, 2)

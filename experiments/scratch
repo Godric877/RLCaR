@@ -1,1 +1,23 @@
-bhr  : semi_gradient_sarsa_lambda 20 episodes  0.19988279819294658
+
+Average BHR on test data :  0.32431377571990927 LFU 20 episodes semi-gradient-sarsa
+Average BHR on test data :  0.3048781347374865 LRU 20 episodes semi-gradient-sarsa
+Average BHR on test data :  0.2069968126235923 FIFO 20 episodes semi-gradient-sarsa
+
+Average BHR on test data :  0.31541169628008753 LFU 20 episodes semi-gradient-sarsa
+Average BHR on test data :  0.30545926748786245 LRU 20 episodes semi-gradient-sarsa
+Average BHR on test data :  0.21447233150446082 FIFO 20 episodes semi-gradient-sarsa
+Average BHR on test data :  0.21905908945736902 LRU with action = 1
+Average BHR on test data :  0.34458940077996336 LFU with action = 1
+Average BHR on test data :  0.17755621299854102 FIFO with action = 1
+
+Average BHR on test data :  0.31167647066116966 LRU+LFU 20 episodes semi-gradient-sarsa
+
+Average BHR on test data :  0.339925737554025 LFU with random action
+Average BHR on test data :  0.2376831244487361 LRU with random action
+
+Average BHR on test data :  0.3367723665646943
+
+
+
+
+
