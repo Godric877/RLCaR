@@ -17,6 +17,15 @@ Average BHR on test data :  0.2376831244487361 LRU with random action
 
 Average BHR on test data :  0.3367723665646943
 
+max_frequency = 1200
+
+TODO :
+1) Reinforce
+2) Q-learning
+3) 1-d Tiling
+4) Average over multiple runs
+5) Plan timeline
+
 
 
 

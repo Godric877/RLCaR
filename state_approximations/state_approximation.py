@@ -1,5 +1,5 @@
-class StateValueApproximation(object):
-    def __call__(self,s, a) -> float:
+class StateApproximation(object):
+    def __call__(self,s) -> float:
         """
         return the value of given state; \hat{v}(s)
 
@@ -10,7 +10,7 @@ class StateValueApproximation(object):
         """
         raise NotImplementedError()
 
-    def update(self,alpha,G,state, action):
+    def update(self,alpha,G,state):
         """
         Implement the update rule;
         w <- w + \alpha[G- \hat{v}(s_tau;w)] \nabla\hat{v}(s_tau;w)

@@ -1,9 +1,8 @@
 import numpy as np
 
-from approximations.state_value_approximation import StateValueApproximation
+from state_action_approximations.state_action_approximation import StateActionApproximation
 import torch
 from torch import nn
-from collections import OrderedDict
 
 
 class NeuralNetwork(nn.Module):
@@ -14,7 +13,7 @@ class NeuralNetwork(nn.Module):
     def forward(self, x):
         return self.model(x)
 
-class LinearApproximation(StateValueApproximation):
+class LinearStateActionApproximation(StateActionApproximation):
         def create_model(self):
             self.model = NeuralNetwork(self.state_dims * self.num_actions)
             self.loss_fn = nn.MSELoss()

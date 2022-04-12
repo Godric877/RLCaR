@@ -1,7 +1,10 @@
-import numpy as np
-from approximations.state_value_approximation import StateValueApproximation
+# One step Semi Gradient Sarsa
 
-def epsilon_greedy(Q:StateValueApproximation, epsilon, state, actions):
+import numpy as np
+
+from state_action_approximations.state_action_approximation import StateActionApproximation
+
+def epsilon_greedy(Q:StateActionApproximation, epsilon, state, actions):
     random = np.random.binomial(1, epsilon)
     max_ac = 0
     if random == 0:
@@ -17,7 +20,7 @@ def epsilon_greedy(Q:StateValueApproximation, epsilon, state, actions):
         max_ac = actions[index]
     return max_ac
 
-def semi_gradient_sarsa(env, gamma, alpha, Q:StateValueApproximation,
+def semi_gradient_sarsa(env, gamma, alpha, Q:StateActionApproximation,
                         epsilon, episodes, actions):
     #episodes = np.arange(num_episode)
     #train, eval = train_test_split(episodes, test_size=0.2)

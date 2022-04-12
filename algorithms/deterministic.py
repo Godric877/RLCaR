@@ -8,7 +8,7 @@ def always_evict(env, episodes):
         done = False
         episode_rewards = []
         while not done:
-            act = 1
+            act = 0
             obs, reward, done, info = env.step(act)
             episode_rewards.append(reward)
             if done:

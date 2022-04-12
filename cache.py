@@ -219,7 +219,7 @@ class CacheSim(object):
         '''
         Return the state of the object,  [obj_size, cache_size_online_remain, recency (steps since object was last visited) = req - last visited time]
         If an object has never been seen before, assigned a constant for the recency feature.
-        For more information, see Learning Caching Policies with Subsampling:
+        For more information, see Learning Caching policy_approximations with Subsampling:
             http://mlforsystems.org/assets/papers/neurips2019/learning_wang_2019.pdf
         '''
         obj_time, obj_id, obj_size = obj[0], obj[1], obj[2]
