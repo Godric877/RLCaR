@@ -273,9 +273,9 @@ class CacheEnv():
     * REFERENCE *
     """
 
-    def __init__(self, replacement_policies, seed=42):
+    def __init__(self, replacement_policies, cache_size=cache_size_default, seed=42):
         self.seed(seed)
-        self.cache_size = cache_size_default
+        self.cache_size = cache_size
 
         # load trace, attach initial online feature values
         self.src = TraceSrc(trace=cache_trace_default, cache_size=self.cache_size)

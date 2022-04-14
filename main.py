@@ -13,7 +13,6 @@ from policy_approximations.linear_policy_approximation import LinearPolicyApprox
 from state_action_approximations.tile_coding_state_action import StateActionFeatureVectorWithTile
 from sklearn.model_selection import train_test_split
 
-
 def plot_reward(rewards, filename):
     plt.plot(np.arange(0, len(rewards)), np.cumsum(rewards))
     plt.xlabel("time")
@@ -28,10 +27,12 @@ def get_metrics(test, episode, rewards, bhr, filename):
         avg_test_bhr += bhr[index]
     avg_test_bhr /= len(test)
     print("Average BHR on test data : ", avg_test_bhr)
-    plot_reward(rewards[test[episode]], filename)
+    return avg_test_bhr
+    # plot_reward(rewards[test[episode]], filename)
 
 def semi_gradient_sarsa_with_linear_approx(env, train, test):
     # Semi-gradient Sarsa with linear function approximation
+    print("Running one-step Sarsa")
     epsilon = 0.1
     actions = [0, 1]
     gamma = 1
@@ -39,22 +40,25 @@ def semi_gradient_sarsa_with_linear_approx(env, train, test):
     L = LinearStateActionApproximation(5, 2, alpha)
     semi_gradient_sarsa(env, gamma, alpha, L, epsilon, train, actions)
     rewards, bhr = semi_gradient_sarsa(env, gamma, alpha, L, epsilon, test, actions)
-    get_metrics(test, 0, rewards, bhr, "experiments/graphs/semi_gradient_sarsa.png")
+    print("======================")
+    return get_metrics(test, 0, rewards, bhr, "experiments/graphs/semi_gradient_sarsa.png")
 
-def semi_gradient_n_step_sarsa_with_linear_approx(env, train, test):
-    # Semi-gradient Sarsa with linear function approximation
+def semi_gradient_n_step_sarsa_with_linear_approx(env, train, test, n=1):
+    print("Running ", n, "-step Sarsa")
+    # Semi-gradient n-step Sarsa with linear function approximation
     epsilon = 0.1
     actions = [0, 1]
     gamma = 1
     alpha = 0.01
-    n = 1
     L = LinearStateActionApproximation(5, 2, alpha)
     semi_gradient_n_step_sarsa(env, gamma, alpha, L, epsilon, train, actions, n)
     rewards, bhr = semi_gradient_n_step_sarsa(env, gamma, alpha, L, epsilon, test, actions, n)
-    get_metrics(test, 0, rewards, bhr, "experiments/graphs/semi_gradient_n_step_sarsa.png")
+    print("======================")
+    return get_metrics(test, 0, rewards, bhr, "experiments/graphs/semi_gradient_n_step_sarsa.png")
 
 def run_reinforce(env, train, test):
-    # Semi-gradient Sarsa with linear function approximation
+    print("Running Reinforce")
+    # Reinforce with linear function approximation
     epsilon = 0.1
     actions = [0, 1]
     gamma = 1
@@ -65,9 +69,11 @@ def run_reinforce(env, train, test):
     pi = LinearPolicyApproximation(5, 2, alpha_theta)
     reinforce(env, gamma, train,pi, L)
     rewards, bhr = reinforce(env, gamma, test,pi, L)
-    get_metrics(test, 0, rewards, bhr, "experiments/graphs/reinforce.png")
+    print("======================")
+    return get_metrics(test, 0, rewards, bhr, "experiments/graphs/reinforce.png")
 
 def true_online_sarsa_lambda(env, train, test):
+    print("Running True online Sarsa Lambda")
     gamma = 1
     alpha = 0.01
     lamda = 0.8
@@ -83,28 +89,34 @@ def true_online_sarsa_lambda(env, train, test):
     )
     TrueOnlineSarsaLambda(env, gamma, lamda, alpha, X, train)
     rewards, bhr = TrueOnlineSarsaLambda(env, gamma, lamda, alpha, X, test)
-    get_metrics(test, 0, rewards, bhr, "experiments/graphs/true_online_sarsa_lambda.png")
-
+    return get_metrics(test, 0, rewards, bhr, "experiments/graphs/true_online_sarsa_lambda.png")
+    print("======================")
 
 def run_always_evict(env, train, test):
+    print("Running Always Evict")
     always_evict(env, train)
     rewards, bhr = always_evict(env, test)
-    get_metrics(test, 0, rewards, bhr, "experiments/graphs/lru.png")
+    print("======================")
+    return get_metrics(test, 0, rewards, bhr, "experiments/graphs/lru.png")
 
 if __name__ == "__main__":
+    num_repetitions = 5
+
+    # LRU experiments
     num_episodes = 20
     episodes = np.arange(num_episodes)
-    train, test = train_test_split(episodes, test_size=0.2)
-
     policies = ["LRU"]
     env = CacheEnv(policies)
-    #semi_gradient_sarsa_with_linear_approx(env, train, test)
-    run_reinforce(env, train, test)
-
-    # for policy in policies:
-    #     env = CacheEnv([policy])
-    #     print("Policy used: ", policy)
-    #     semi_gradient_sarsa_with_linear_approx(env, train, test)
-    #
-    # env = CacheEnv(["LRU"])
-    # run_always_evict(env, train, test)
+    bhr_metrics = {"always_evict" : [],
+                   "semi_gradient_sarsa_1" : [],
+                   "semi_gradient_sarsa_5" : [],
+                   "reinforce" : []}
+    for r in range(num_repetitions):
+        train, test = train_test_split(episodes, test_size=0.2)
+        bhr_metrics["always_evict"].append(run_always_evict(env, train, test))
+        bhr_metrics["semi_gradient_sarsa_1"].append(semi_gradient_n_step_sarsa_with_linear_approx(env, train, test, n=1))
+        bhr_metrics["semi_gradient_sarsa_5"].append(semi_gradient_n_step_sarsa_with_linear_approx(env, train, test, n=5))
+        bhr_metrics["reinforce"].append(run_reinforce(env, train, test))
+    print(bhr_metrics)
+    for rl_algo in bhr_metrics:
+        print(rl_algo, ": ", np.mean(np.array(bhr_metrics[rl_algo])))
