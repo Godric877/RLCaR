@@ -5,7 +5,7 @@ import heapq
 from gym import spaces
 from replacement_agent import ReplacementAgent
 
-from trace_loader import load_traces
+from trace_loader import load_traces, get_stats
 
 # from park import core, spaces, logger
 # from park.param import config
@@ -36,6 +36,7 @@ class TraceSrc(object):
         self.trace = trace
         self.cache_size = cache_size
         self.load_trace = load_traces(self.trace, self.cache_size, 0)
+        self.means, self.stddevs = get_stats(self.load_trace)
         self.n_request = len(self.load_trace)
         self.cache_size = cache_size
         self.min_values = np.asarray([1, 0, 0])
@@ -45,6 +46,7 @@ class TraceSrc(object):
     def reset(self, random):
         if self.trace == 'test':
             self.load_trace = load_traces(self.trace, self.cache_size, random)
+            self.means, self.stddevs = get_stats(self.load_trace)
         self.n_request = len(self.load_trace)
         self.min_values = np.asarray([1, 0, 0])
         self.max_values = np.asarray([self.cache_size, self.cache_size, max(self.load_trace[0])])
@@ -63,9 +65,11 @@ class TraceSrc(object):
         done = (self.req + 1) >= self.n_request
         return obs, done
 
+    def get_trace_stats(self):
+        return self.means, self.stddevs
 
 class CacheSim(object):
-    def __init__(self, cache_size, policy, action_space, state_space, replacement_policies):
+    def __init__(self, cache_size, policy, action_space, state_space, replacement_policies, trace_means, trace_stddevs):
         # invariant
         '''
         This is the simulater for the cache.
@@ -96,8 +100,10 @@ class CacheSim(object):
         self.size_all = 0
         self.object_frequency = Counter()
         self.object_average_interarrival = Counter()
+        self.trace_means = trace_means
+        self.trace_stddevs = trace_stddevs
 
-    def reset(self):
+    def reset(self, trace_means, trace_stddevs):
         self.req = 0
         self.non_cache = defaultdict(list)
         self.cache = defaultdict(list)
@@ -109,6 +115,8 @@ class CacheSim(object):
         self.agent.reset()
         self.object_frequency = Counter()
         self.object_average_interarrival = Counter()
+        self.trace_means = trace_means
+        self.trace_stddevs = trace_stddevs
 
     def step(self, action, obj):
         req = self.req
@@ -215,6 +223,13 @@ class CacheSim(object):
         except IndexError:
             return False
 
+    def get_normalized_state(self, state):
+        normalized_state = []
+        for index, s in enumerate(state):
+            normalized_state.append( (s-self.trace_means[index])/self.trace_stddevs[index])
+        normalized_state[1] /= self.cache_size
+        return normalized_state
+
     def get_state(self, obj=[0, 0, 0, 0]):
         '''
         Return the state of the object,  [obj_size, cache_size_online_remain, recency (steps since object was last visited) = req - last visited time]
@@ -234,7 +249,7 @@ class CacheSim(object):
         state = [obj_size, self.cache_remain, req, self.object_frequency[obj_id],
                  self.object_average_interarrival[obj_id]]
 
-        return state
+        return self.get_normalized_state(state)
 
 
 class CacheEnv():
@@ -272,11 +287,14 @@ class CacheEnv():
                                             dtype=np.float32)
 
         # cache simulator
+        trace_means, trace_stddevs = self.src.get_trace_stats()
         self.sim = CacheSim(cache_size=self.cache_size, \
                             policy='lru', \
                             action_space=self.action_space, \
                             state_space=self.observation_space,
-                            replacement_policies=replacement_policies)
+                            replacement_policies=replacement_policies,
+                            trace_means=trace_means,
+                            trace_stddevs=trace_stddevs)
 
         # reset environment (generate new jobs)
         self.reset(1, 2)
@@ -284,7 +302,8 @@ class CacheEnv():
     def reset(self, trace_index, low=0, high=1000):
         #new_trace = np.random.randint(low, high)
         self.src.reset(trace_index)
-        self.sim.reset()
+        trace_means, trace_stddevs = self.src.get_trace_stats()
+        self.sim.reset(trace_means, trace_stddevs)
         if cache_trace_default == 'test':
             print("New Env Start", trace_index)
         elif cache_trace_default == 'real':

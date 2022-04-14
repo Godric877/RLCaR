@@ -3,10 +3,10 @@
 import numpy as np
 
 from state_approximations.linear_v_approximation import LinearStateApproximation
-from policy_approximations.linear_policy_approximation import LinearPiApproximation
+from policy_approximations.linear_policy_approximation import LinearPolicyApproximation
 
 def actor_critic_eligibility_trace(env, gamma, alpha_theta, alpha_w, lambda_theta, lambda_w,
-                                   V:LinearStateApproximation, pi:LinearPiApproximation,
+                                   V:LinearStateApproximation, pi:LinearPolicyApproximation,
                                    episodes):
     bhr_metric = {}
     rewards = {}

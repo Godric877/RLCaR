@@ -4,11 +4,12 @@ import numpy as np
 from algorithms.semi_gradient_sarsa_algorithm import semi_gradient_sarsa
 from algorithms.actor_critic_eligibility_trace_algorithm import actor_critic_eligibility_trace
 from algorithms.deterministic import always_evict
+from algorithms.reinforce_algorithm import reinforce
 from algorithms.true_online_sarsa_lambda import TrueOnlineSarsaLambda
 from algorithms.semi_gradient_n_step_sarsa_algorithm import semi_gradient_n_step_sarsa
 from state_action_approximations.linear_q_approximation import LinearStateActionApproximation
 from state_approximations.linear_v_approximation import LinearStateApproximation
-from policy_approximations.linear_policy_approximation import LinearPiApproximation
+from policy_approximations.linear_policy_approximation import LinearPolicyApproximation
 from state_action_approximations.tile_coding_state_action import StateActionFeatureVectorWithTile
 from sklearn.model_selection import train_test_split
 
@@ -52,6 +53,20 @@ def semi_gradient_n_step_sarsa_with_linear_approx(env, train, test):
     rewards, bhr = semi_gradient_n_step_sarsa(env, gamma, alpha, L, epsilon, test, actions, n)
     get_metrics(test, 0, rewards, bhr, "experiments/graphs/semi_gradient_n_step_sarsa.png")
 
+def run_reinforce(env, train, test):
+    # Semi-gradient Sarsa with linear function approximation
+    epsilon = 0.1
+    actions = [0, 1]
+    gamma = 1
+    alpha_theta = 3e-4
+    alpha_w = 3e-4
+    n = 1
+    L = LinearStateApproximation(5, alpha_w)
+    pi = LinearPolicyApproximation(5, 2, alpha_theta)
+    reinforce(env, gamma, train,pi, L)
+    rewards, bhr = reinforce(env, gamma, test,pi, L)
+    get_metrics(test, 0, rewards, bhr, "experiments/graphs/reinforce.png")
+
 def true_online_sarsa_lambda(env, train, test):
     gamma = 1
     alpha = 0.01
@@ -70,28 +85,6 @@ def true_online_sarsa_lambda(env, train, test):
     rewards, bhr = TrueOnlineSarsaLambda(env, gamma, lamda, alpha, X, test)
     get_metrics(test, 0, rewards, bhr, "experiments/graphs/true_online_sarsa_lambda.png")
 
-def actor_critic_with_eligibility_traces_and_linear_approx(env, train, test):
-    # Semi-gradient Sarsa with linear function approximation
-    epsilon = 0.1
-    actions = [0, 1]
-    gamma = 1
-    alpha_theta = 1e-4
-    alpha_w = 1e-4
-    lambda_theta = 0.2
-    lamdba_w = 0.3
-    V = LinearStateApproximation(5, alpha_w)
-    pi = LinearPiApproximation(5, 2, alpha_theta)
-    actor_critic_eligibility_trace(env, gamma,
-                                   alpha_theta, alpha_w,
-                                   lambda_theta, lamdba_w,
-                                   V, pi,
-                                   train)
-    rewards, bhr = actor_critic_eligibility_trace(env, gamma,
-                                   alpha_theta, alpha_w,
-                                   lambda_theta, lamdba_w,
-                                   V, pi,
-                                   test)
-    get_metrics(test, 0, rewards, bhr, "experiments/graphs/actor_critic_eligibility_trace_linear.png")
 
 def run_always_evict(env, train, test):
     always_evict(env, train)
@@ -106,7 +99,7 @@ if __name__ == "__main__":
     policies = ["LRU"]
     env = CacheEnv(policies)
     #semi_gradient_sarsa_with_linear_approx(env, train, test)
-    semi_gradient_n_step_sarsa_with_linear_approx(env, train, test)
+    run_reinforce(env, train, test)
 
     # for policy in policies:
     #     env = CacheEnv([policy])
