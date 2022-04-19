@@ -44,7 +44,7 @@ class TraceSrc(object):
         self.req = 0
 
     def reset(self, random):
-        if self.trace == 'test':
+        if self.trace == 'test' or self.trace.startswith('zipf'):
             self.load_trace = load_traces(self.trace, self.cache_size, random)
             self.means, self.stddevs = get_stats(self.load_trace)
         self.n_request = len(self.load_trace)
@@ -273,12 +273,13 @@ class CacheEnv():
     * REFERENCE *
     """
 
-    def __init__(self, replacement_policies, cache_size=cache_size_default, seed=42):
+    def __init__(self, replacement_policies, cache_size=cache_size_default,
+                 trace=cache_trace_default, seed=42):
         self.seed(seed)
         self.cache_size = cache_size
 
         # load trace, attach initial online feature values
-        self.src = TraceSrc(trace=cache_trace_default, cache_size=self.cache_size)
+        self.src = TraceSrc(trace=trace, cache_size=self.cache_size)
 
         # set up the state and action space
         self.action_space = spaces.Discrete(2)

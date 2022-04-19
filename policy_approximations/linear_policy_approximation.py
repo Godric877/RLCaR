@@ -18,6 +18,7 @@ class LinearPolicyApproximation():
         self.model = NeuralNetworkPA(self.state_dims, self.num_actions)
         self.optimizer = torch.optim.Adam(self.model.parameters(), lr=self.alpha, betas=(0.9, 0.999))
 
+
     def __init__(self,
                  state_dims,
                  num_actions,
@@ -55,4 +56,21 @@ class LinearPolicyApproximation():
         self.optimizer.zero_grad()
         loss.backward()
         self.optimizer.step()
+
+    def return_gradient(self, s, a):
+        self.model.train()
+        s = torch.tensor(s)
+        pred = self.model(s.float())
+        self.model.zero_grad()
+        log_prob = torch.log(pred)[a].unsqueeze(0)
+        log_prob.backward()
+        grad =  self.model.model[0].weight.grad.numpy()
+        #print("grad: ", grad)
+        return grad
+
+    def manual_update(self, update_vector):
+        with torch.no_grad():
+            update_vector = torch.tensor(update_vector)
+            self.model.model[0].weight += update_vector
+            #print("Weights : ", self.model.model[0].weight)
 

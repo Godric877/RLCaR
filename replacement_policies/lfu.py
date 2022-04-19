@@ -1,4 +1,5 @@
-from collections import defaultdict, OrderedDict, Counter
+import random
+from collections import defaultdict, Counter
 from replacement_policies.policy_base import PolicyBase
 
 class LFUCache(PolicyBase):
@@ -6,7 +7,7 @@ class LFUCache(PolicyBase):
     def __init__(self, capacity: int):
         self.capacity = capacity
         self.object_to_count = {}
-        self.count_to_object = defaultdict(OrderedDict)
+        self.count_to_object = defaultdict(defaultdict)
         self.min_count = None
         self.history = []
         self.history_dict = Counter()
@@ -39,7 +40,10 @@ class LFUCache(PolicyBase):
 
     def remove(self):
         self.update_history()
-        key ,val = self.count_to_object[self.min_count].popitem(last=False)
+        count_dictionary = self.count_to_object[self.min_count]
+        key = random.choice(list(count_dictionary.keys()))
+        val = count_dictionary[key]
+        del self.count_to_object[self.min_count][key]
         del self.object_to_count[key]
         return key ,val
 
@@ -61,7 +65,7 @@ class LFUCache(PolicyBase):
 
     def reset(self):
         self.object_to_count = {}
-        self.count_to_object = defaultdict(OrderedDict)
+        self.count_to_object = defaultdict(defaultdict)
         self.min_count = None
         self.history = []
         self.history_dict = Counter()
