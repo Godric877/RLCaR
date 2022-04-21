@@ -37,13 +37,13 @@ def semi_gradient_n_step_sarsa(env, gamma, alpha, Q:StateActionApproximation,
         while not done:
             if(t < T):
                 s_next, reward, done, info = env.step(action)
-                episode.append((s_current, action, s_next, reward))
-                episode_rewards.append(reward)
                 if done:
+                    episode.append((s_current, action, s_next, reward, -1))
                     T = t + 1
                     bhr_metric[i] = info[2]
                 else:
                     next_action = epsilon_greedy(Q, epsilon, s_next, actions)
+                    episode.append((s_current, action, s_next, reward, next_action))
                 s_current = s_next
                 action = next_action
             tau = t - n + 1
@@ -54,7 +54,7 @@ def semi_gradient_n_step_sarsa(env, gamma, alpha, Q:StateActionApproximation,
                     G += discount*episode[j][3]
                     discount *= gamma
                 if(tau+n < T):
-                    G = G + np.power(gamma,n)*Q(episode[tau+n-1][0], episode[tau+n-1][1])
+                    G = G + np.power(gamma,n)*Q(episode[tau+n-1][2], episode[tau+n-1][4])
                 Q.update(alpha, G, episode[tau][0], episode[tau][1])
             t += 1
             if(tau == T-1):
