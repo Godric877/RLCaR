@@ -1,19 +1,21 @@
+import torch
 import numpy as np
 
 from state_action_approximations.state_action_approximation import StateActionApproximation
-import torch
+from collections import OrderedDict
 from torch import nn
 
 
 class NeuralNetwork(nn.Module):
     def __init__(self, dims):
         super(NeuralNetwork, self).__init__()
-        self.model = nn.Linear(dims, 1)
+        self.model = nn.Sequential(OrderedDict([('fc1', nn.Linear(dims, dims)),
+                                                ('fc2', nn.Linear(dims, 1))]))
 
     def forward(self, x):
         return self.model(x)
 
-class LinearStateActionApproximation(StateActionApproximation):
+class NeuralNetworkStateActionApproximation(StateActionApproximation):
         def create_model(self):
             self.model = NeuralNetwork(self.state_dims * self.num_actions)
             self.loss_fn = nn.MSELoss()
