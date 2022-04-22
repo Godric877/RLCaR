@@ -16,7 +16,7 @@ def always_evict(env, episodes):
         rewards[i] =  episode_rewards
     return rewards, bhr_metric
 
-def random_eviction(env, episodes):
+def random_eviction(env, episodes, p=[0.5, 0.5]):
     bhr_metric = {}
     rewards = {}
     for i in episodes:
@@ -24,7 +24,7 @@ def random_eviction(env, episodes):
         done = False
         episode_rewards = []
         while not done:
-            act = np.random.choice(np.arange(2), p=[0.8, 0.2])
+            act = np.random.choice(np.arange(2), p=p)
             obs, reward, done, info = env.step(act)
             episode_rewards.append(reward)
             if done:
