@@ -1,10 +1,12 @@
+from algorithms.actor_critic_eligibility_trace_algorithm_nn import actor_critic_eligibility_trace_nn
 from cache import CacheEnv
 import matplotlib.pyplot as plt
 import numpy as np
 import csv
 import pandas as pd
 from algorithms.semi_gradient_sarsa_algorithm import semi_gradient_sarsa
-from algorithms.actor_critic_eligibility_trace_algorithm import actor_critic_eligibility_trace
+from algorithms.actor_critic_eligibility_trace_algorithm_tc import actor_critic_eligibility_trace_tc
+from algorithms.actor_critic_one_step import actor_critic_one_step
 from algorithms.deterministic import always_evict
 from algorithms.reinforce_algorithm import reinforce
 from algorithms.true_online_sarsa_lambda import TrueOnlineSarsaLambda
@@ -53,15 +55,18 @@ def semi_gradient_n_step_sarsa_with_linear_approx(env, train, test, n=1):
     epsilon = 0.1
     actions = [0, 1]
     gamma = 1
-    alpha = 1e-3
+    if n == 1:
+        alpha = 1e-2
+    else:
+        alpha = 1e-3
     L = LinearStateActionApproximation(5, 2, alpha)
     semi_gradient_n_step_sarsa(env, gamma, alpha, L, epsilon, train, actions, n)
     rewards, bhr = semi_gradient_n_step_sarsa(env, gamma, alpha, L, epsilon, test, actions, n)
     print("======================")
     return get_metrics(test, 0, rewards, bhr, "experiments/graphs/semi_gradient_n_step_sarsa.png")
 
-def run_actor_critic_eligibility_trace(env, train, test):
-    print("Running actor critic")
+def run_actor_critic_eligibility_trace_tc(env, train, test):
+    print("Running actor critic with eligibility traces tc")
     # Actor critic with 1-D tile coding
     gamma = 1
     alpha_theta = 1e-3
@@ -78,18 +83,56 @@ def run_actor_critic_eligibility_trace(env, train, test):
         tile_width=tile_width
     )
     pi = LinearPolicyApproximation(5, 2, alpha_theta)
-    actor_critic_eligibility_trace(env, gamma,
-                                   alpha_theta, alpha_w,
-                                   lambda_theta, lamdba_w,
-                                   V, pi,
-                                   train)
-    rewards, bhr = actor_critic_eligibility_trace(env, gamma,
-                                                  alpha_theta, alpha_w,
-                                                  lambda_theta, lamdba_w,
-                                                  V, pi,
-                                                  test)
+    actor_critic_eligibility_trace_tc(env, gamma,
+                                      alpha_theta, alpha_w,
+                                      lambda_theta, lamdba_w,
+                                      V, pi,
+                                      train)
+    rewards, bhr = actor_critic_eligibility_trace_tc(env, gamma,
+                                                     alpha_theta, alpha_w,
+                                                     lambda_theta, lamdba_w,
+                                                     V, pi,
+                                                     test)
     print("======================")
     return get_metrics(test, 0, rewards, bhr, "experiments/graphs/actor_critic_eligibility_trace.png")
+
+def run_actor_critic_eligibility_trace_nn(env, train, test):
+    print("Running actor critic with eligibility traces nn")
+    # Actor critic with neural network and eligibility traces
+    gamma = 1
+    alpha_theta = 1e-3
+    alpha_w = 1e-3
+    lambda_theta = 0.8
+    lamdba_w = 0.8
+    V = LinearStateApproximation(5, alpha_w)
+    pi = LinearPolicyApproximation(5, 2, alpha_theta)
+    actor_critic_eligibility_trace_nn(env, gamma,
+                                      alpha_theta, alpha_w,
+                                      lambda_theta, lamdba_w,
+                                      V, pi,
+                                      train)
+    rewards, bhr = actor_critic_eligibility_trace_nn(env, gamma,
+                                                     alpha_theta, alpha_w,
+                                                     lambda_theta, lamdba_w,
+                                                     V, pi,
+                                                     test)
+    print("======================")
+    return get_metrics(test, 0, rewards, bhr, "experiments/graphs/actor_critic_eligibility_trace_nn.png")
+
+def run_actor_critic_one_step(env, train, test):
+    print("Running actor critic one step")
+    # Actor critic with 1-D tile coding
+    gamma = 1
+    alpha_theta = 1e-3
+    alpha_w = 1e-3
+    V = LinearStateApproximation(5, alpha_w)
+    pi = LinearPolicyApproximation(5, 2, alpha_theta)
+    actor_critic_one_step(env, gamma, alpha_theta, alpha_w,
+                           V, pi, train)
+    rewards, bhr = actor_critic_one_step(env, gamma,alpha_theta, alpha_w,
+                                        V, pi, test)
+    print("======================")
+    return get_metrics(test, 0, rewards, bhr, "experiments/graphs/actor_critic_one_step.png")
 
 def run_reinforce(env, train, test):
     print("Running Reinforce")
@@ -149,31 +192,31 @@ if __name__ == "__main__":
     policies = ["LRU"]
     env = CacheEnv(policies, cache_size=20)
     #run_actor_critic_eligibility_trace(env, train, test)
-    #semi_gradient_n_step_sarsa_with_linear_approx(env, train, test, n=20)
+    #semi_gradient_n_step_sarsa_with_linear_approx(env, train, test, n=1)
     #run_always_evict(env, episodes, episodes)
 
-    rewards, bhr = optimal_admission(np.arange(5), 20)
-    print(bhr)
-    get_metrics(np.arange(5), [], rewards, bhr, '')
+    # rewards, bhr = optimal_admission(np.arange(5), 20)
+    # print(bhr)
+    # get_metrics(np.arange(5), [], rewards, bhr, '')
 
     # LRU experiments
     # num_episodes = 50
     # episodes = np.arange(num_episodes)
     # policies = ["LFU"]
     # env = CacheEnv(policies, cache_size=50)
-    # bhr_metrics = {"always_evict" : [],
-    #                "semi_gradient_sarsa_1" : [],
-    #                "semi_gradient_sarsa_5" : [],
-    #                "reinforce" : []}
-    # for r in range(num_repetitions):
+    bhr_metrics = {"actor_critic_tc" : [],
+                   "actor_critic_nn" : [],
+                   "semi_gradient_sarsa_20": []}
+    for r in range(num_repetitions):
     #     train, test = train_test_split(episodes, test_size=0.2)
     #     bhr_metrics["always_evict"].append(run_always_evict(env, train, test))
-    #     bhr_metrics["semi_gradient_sarsa_1"].append(semi_gradient_n_step_sarsa_with_linear_approx(env, train, test, n=1))
-    #     bhr_metrics["semi_gradient_sarsa_5"].append(semi_gradient_n_step_sarsa_with_linear_approx(env, train, test, n=5))
+    #         bhr_metrics["actor_critic_tc"].append(run_actor_critic_eligibility_trace_tc(env, train, test))
+    #         bhr_metrics["actor_critic_nn"].append(run_actor_critic_eligibility_trace_nn(env, train, test))
+            bhr_metrics["semi_gradient_sarsa_20"].append(semi_gradient_n_step_sarsa_with_linear_approx(env, train, test, n=20))
     #     bhr_metrics["reinforce"].append(run_reinforce(env, train, test))
-    # print(bhr_metrics)
-    # for rl_algo in bhr_metrics:
-    #     print(rl_algo, ": ", np.mean(np.array(bhr_metrics[rl_algo])))
+    print(bhr_metrics)
+    for rl_algo in bhr_metrics:
+        print(rl_algo, ": ", np.mean(np.array(bhr_metrics[rl_algo])))
     #
     # try:
     #     df = pd.DataFrame.from_dict(bhr_metrics)

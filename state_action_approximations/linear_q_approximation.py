@@ -50,7 +50,7 @@ class LinearStateActionApproximation(StateActionApproximation):
             self.model.train()
             input = self.get_input(s, a)
             pred = self.model(input.float())
-            G = torch.tensor(G, dtype=torch.float32)
+            G = torch.tensor([G], dtype=torch.float32)
             loss = 0.5 * self.loss_fn(pred, G)
             self.optimizer.zero_grad()
             loss.backward()

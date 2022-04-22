@@ -5,9 +5,9 @@ import numpy as np
 from state_approximations.one_d_tc import StateOneDTileCoding
 from policy_approximations.linear_policy_approximation import LinearPolicyApproximation
 
-def actor_critic_eligibility_trace(env, gamma, alpha_theta, alpha_w, lambda_theta, lambda_w,
-                                   V:StateOneDTileCoding, pi:LinearPolicyApproximation,
-                                   episodes):
+def actor_critic_eligibility_trace_tc(env, gamma, alpha_theta, alpha_w, lambda_theta, lambda_w,
+                                      V:StateOneDTileCoding, pi:LinearPolicyApproximation,
+                                      episodes):
     bhr_metric = {}
     rewards = {}
     for i in episodes:
@@ -28,7 +28,7 @@ def actor_critic_eligibility_trace(env, gamma, alpha_theta, alpha_w, lambda_thet
         done = False
         episode_rewards = []
         while not done:
-            s_current  = [s_x /1000 for s_x in s_current]
+            #s_current  = [s_x /1000 for s_x in s_current]
             action = pi(s_current)
             s_next, reward, done, info = env.step(action)
             episode_rewards.append(reward)
