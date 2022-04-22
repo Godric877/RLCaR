@@ -5,11 +5,13 @@ import csv
 import pandas as pd
 from algorithms.semi_gradient_sarsa_algorithm import semi_gradient_sarsa
 from algorithms.actor_critic_eligibility_trace_algorithm import actor_critic_eligibility_trace
-from algorithms.deterministic import always_evict
+from algorithms.deterministic import always_evict, random_eviction
 from algorithms.reinforce_algorithm import reinforce
 from algorithms.true_online_sarsa_lambda import TrueOnlineSarsaLambda
-from algorithms.semi_gradient_n_step_sarsa_algorithm import semi_gradient_n_step_sarsa
+from algorithms.semi_gradient_n_step_sarsa_algorithm import semi_gradient_n_step_sarsa, semi_gradient_n_step_sarsa_tc
 from state_action_approximations.linear_q_approximation import LinearStateActionApproximation
+from state_action_approximations.nn_q_approximation import NeuralNetworkStateActionApproximation
+from state_action_approximations.one_d_tc import StateActionOneDTileCoding
 from state_approximations.linear_v_approximation import LinearStateApproximation
 from policy_approximations.linear_policy_approximation import LinearPolicyApproximation
 from state_action_approximations.tile_coding_state_action import StateActionFeatureVectorWithTile
@@ -53,12 +55,47 @@ def semi_gradient_n_step_sarsa_with_linear_approx(env, train, test, n=1):
     epsilon = 0.1
     actions = [0, 1]
     gamma = 1
-    alpha = 1e-3
+    alpha = 1e-2
     L = LinearStateActionApproximation(5, 2, alpha)
     semi_gradient_n_step_sarsa(env, gamma, alpha, L, epsilon, train, actions, n)
     rewards, bhr = semi_gradient_n_step_sarsa(env, gamma, alpha, L, epsilon, test, actions, n)
     print("======================")
-    return get_metrics(test, 0, rewards, bhr, "experiments/graphs/semi_gradient_n_step_sarsa.png")
+    return get_metrics(test, 0, rewards, bhr, "experiments/graphs/semi_gradient_n_step_sarsa_with_linear_approx.png")
+
+def semi_gradient_n_step_sarsa_with_nn_approx(env, train, test, n=1):
+    print("Running ", n, "-step Sarsa with nn approximation")
+    # Semi-gradient n-step Sarsa with neural network function approximation
+    epsilon = 0.1
+    actions = [0, 1]
+    gamma = 1
+    alpha = 1e-2
+    L = NeuralNetworkStateActionApproximation(5, 2, alpha)
+    semi_gradient_n_step_sarsa(env, gamma, alpha, L, epsilon, train, actions, n)
+    rewards, bhr = semi_gradient_n_step_sarsa(env, gamma, alpha, L, epsilon, test, actions, n)
+    print("======================")
+    return get_metrics(test, 0, rewards, bhr, "experiments/graphs/semi_gradient_n_step_sarsa_with_nn.png")
+
+def semi_gradient_n_step_sarsa_with_tc(env, train, test, n=1):
+    print("Running ", n, "-step Sarsa with tc")
+    # Semi-gradient n-step Sarsa with tile coding function approximation
+    epsilon = 0.1
+    actions = [0, 1]
+    gamma = 1
+    alpha = 1e-2
+    state_low = np.array([1, 0, 0, 1, 0])
+    state_high = np.array([1, 20, 500, 1200, 500])
+    tile_width = np.array([1, 1, 10, 50, 10])
+    X = StateActionOneDTileCoding(
+        state_low,
+        state_high,
+        num_tilings=1,
+        tile_width=tile_width,
+        num_actions=2
+    )
+    semi_gradient_n_step_sarsa_tc(env, gamma, alpha, X, epsilon, train, actions, n)
+    rewards, bhr = semi_gradient_n_step_sarsa_tc(env, gamma, alpha, X, epsilon, test, actions, n)
+    print("======================")
+    return get_metrics(test, 0, rewards, bhr, "experiments/graphs/semi_gradient_n_step_sarsa_with_tc.png")
 
 def run_actor_critic_eligibility_trace(env, train, test):
     print("Running actor critic")
@@ -134,6 +171,13 @@ def run_always_evict(env, train, test):
     print("======================")
     return get_metrics(test, 0, rewards, bhr, "experiments/graphs/lru.png")
 
+def run_random_eviction(env, train, test):
+    p = [0.999,0.001]
+    print("Running Random Policy ")
+    rewards, bhr = random_eviction(env, test, p)
+    print("======================")
+    return get_metrics(test, 0, rewards, bhr, "experiments/graphs/random_eviction_lru.png")
+
 if __name__ == "__main__":
     num_repetitions = 5
 
@@ -148,13 +192,18 @@ if __name__ == "__main__":
 
     policies = ["LRU"]
     env = CacheEnv(policies, cache_size=20)
-    #run_actor_critic_eligibility_trace(env, train, test)
-    #semi_gradient_n_step_sarsa_with_linear_approx(env, train, test, n=20)
-    #run_always_evict(env, episodes, episodes)
+    bhr_metrics = []
+    for r in range(num_repetitions):
+        print("Repetion : ", r)
+        train, test = train_test_split(episodes, test_size=0.2)
+        bhr_metrics.append(semi_gradient_n_step_sarsa_with_tc(env, train, test))
+        print("==========================")
+    print("bhr_metrics : ", bhr_metrics)
+    print("Average bhr : ", np.mean(bhr_metrics))
 
-    rewards, bhr = optimal_admission(np.arange(5), 20)
-    print(bhr)
-    get_metrics(np.arange(5), [], rewards, bhr, '')
+    # rewards, bhr = optimal_admission(np.arange(5), 20)
+    # print(bhr)
+    # get_metrics(np.arange(5), [], rewards, bhr, '')
 
     # LRU experiments
     # num_episodes = 50

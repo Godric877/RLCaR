@@ -1,3 +1,4 @@
+import math
 import numpy as np
 import pandas as pd
 from collections import Counter, defaultdict, OrderedDict
@@ -246,6 +247,9 @@ class CacheSim(object):
             except IndexError:
                 # Unseen objects (not in non_cache or cache) are assigned this recency constant
                 req = cache_unseen_default
+        # cache_min_freq = math.inf
+        # for obj_id in self.cache:
+        #     cache_min_freq = min(cache_min_freq, self.object_frequency[obj_id])
         state = [obj_size, self.cache_remain, req, self.object_frequency[obj_id],
                  self.object_average_interarrival[obj_id]]
 
