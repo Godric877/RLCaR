@@ -1,11 +1,14 @@
-import numpy as np
 import torch
+import numpy as np
+
 from torch import nn
+from collections import OrderedDict
 
 class NeuralNetworkVA(nn.Module):
     def __init__(self, dims):
         super(NeuralNetworkVA, self).__init__()
-        self.model = nn.Linear(dims, 1)
+        self.model = nn.Sequential(OrderedDict([('fc1', nn.Linear(dims, dims)),
+                                                ('fc2', nn.Linear(dims, 1))]))
 
     def forward(self, x):
         return self.model(x)
@@ -23,7 +26,7 @@ class Baseline(object):
     def update(self,s,G):
         pass
 
-class LinearStateApproximation(Baseline):
+class NNStateApproximation(Baseline):
 
     def create_model(self):
         self.model = NeuralNetworkVA(self.state_dims)
@@ -51,8 +54,24 @@ class LinearStateApproximation(Baseline):
         self.model.train()
         s = torch.tensor(s)
         pred = self.model(s.float())
-        G = torch.tensor(G, dtype=torch.float32)
+        G = torch.tensor([G], dtype=torch.float32)
         loss = 0.5 * self.loss_fn(pred, G)
         self.optimizer.zero_grad()
         loss.backward()
         self.optimizer.step()
+
+    def return_gradient(self, s):
+        self.model.train()
+        s = torch.tensor(s)
+        pred = self.model(s.float())
+        self.model.zero_grad()
+        pred.backward()
+        grad =  self.model.model.weight.grad.numpy()
+        #print("grad: ", grad)
+        return grad
+
+    def manual_update(self, update_vector):
+        with torch.no_grad():
+            update_vector = torch.tensor(update_vector)
+            self.model.model.weight += update_vector
+            #print("Weights : ", self.model.model[0].weight)

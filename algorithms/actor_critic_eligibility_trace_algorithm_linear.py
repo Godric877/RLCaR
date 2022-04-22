@@ -1,13 +1,13 @@
-# Actor Critic with Eligibility Traces using Neural Network Approximation for State and Linear Approximation Policy
+# Actor Critic with Eligibility Traces using Linear Approximation for State and Policy
 
 import numpy as np
 
-from state_approximations.nn_v_approximation import NNStateApproximation
+from state_approximations.linear_v_approximation import LinearStateApproximation
 from policy_approximations.linear_policy_approximation import LinearPolicyApproximation
 
-def actor_critic_eligibility_trace_nn(env, gamma, alpha_theta, alpha_w, lambda_theta, lambda_w,
-                                      V:NNStateApproximation, pi:LinearPolicyApproximation,
-                                      episodes):
+def actor_critic_eligibility_trace_linear(env, gamma, alpha_theta, alpha_w, lambda_theta, lambda_w,
+                                          V:LinearStateApproximation, pi:LinearPolicyApproximation,
+                                          episodes):
     bhr_metric = {}
     rewards = {}
     for i in episodes:
@@ -16,7 +16,7 @@ def actor_critic_eligibility_trace_nn(env, gamma, alpha_theta, alpha_w, lambda_t
         #print(s_current)
         #print("Feature length {}".format(list(V.model.model.weight.shape))
 
-        V_weights_shape = np.array(list(V.model.weight.shape))
+        V_weights_shape = np.array(list(V.model.model.weight.shape))
         pi_weights_shape = np.array(list(pi.model.model[0].weight.shape))
 
         z_w = np.zeros(V_weights_shape)

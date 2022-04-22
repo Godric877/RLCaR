@@ -1,9 +1,8 @@
+import torch
 import numpy as np
 
 from state_action_approximations.state_action_approximation import StateActionApproximation
-import torch
 from torch import nn
-
 
 class NeuralNetwork(nn.Module):
     def __init__(self, dims):

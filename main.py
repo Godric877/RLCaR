@@ -1,25 +1,29 @@
-from algorithms.actor_critic_eligibility_trace_algorithm_nn import actor_critic_eligibility_trace_nn
-from cache import CacheEnv
-import matplotlib.pyplot as plt
-import numpy as np
 import csv
+import numpy as np
 import pandas as pd
-from algorithms.semi_gradient_sarsa_algorithm import semi_gradient_sarsa
-from algorithms.actor_critic_eligibility_trace_algorithm import actor_critic_eligibility_trace
+import matplotlib.pyplot as plt
+
+from sklearn.model_selection import train_test_split
+from cache import CacheEnv
+
 from algorithms.deterministic import always_evict, random_eviction
-from algorithms.actor_critic_eligibility_trace_algorithm_tc import actor_critic_eligibility_trace_tc
+from algorithms.semi_gradient_sarsa_algorithm import semi_gradient_sarsa
+from algorithms.semi_gradient_n_step_sarsa_algorithm import semi_gradient_n_step_sarsa, semi_gradient_n_step_sarsa_tc
 from algorithms.actor_critic_one_step import actor_critic_one_step
+from algorithms.actor_critic_eligibility_trace_algorithm_linear import actor_critic_eligibility_trace_linear
+from algorithms.actor_critic_eligibility_trace_algorithm_nn import actor_critic_eligibility_trace_nn
+from algorithms.actor_critic_eligibility_trace_algorithm_tc import actor_critic_eligibility_trace_tc
 from algorithms.reinforce_algorithm import reinforce
 from algorithms.true_online_sarsa_lambda import TrueOnlineSarsaLambda
-from algorithms.semi_gradient_n_step_sarsa_algorithm import semi_gradient_n_step_sarsa, semi_gradient_n_step_sarsa_tc
+from state_approximations.linear_v_approximation import LinearStateApproximation
+from state_approximations.nn_v_approximation import NNStateApproximation
+from state_approximations.one_d_tc import StateOneDTileCoding
+from policy_approximations.linear_policy_approximation import LinearPolicyApproximation
 from state_action_approximations.linear_q_approximation import LinearStateActionApproximation
 from state_action_approximations.nn_q_approximation import NeuralNetworkStateActionApproximation
 from state_action_approximations.one_d_tc import StateActionOneDTileCoding
-from state_approximations.linear_v_approximation import LinearStateApproximation
-from policy_approximations.linear_policy_approximation import LinearPolicyApproximation
 from state_action_approximations.tile_coding_state_action import StateActionFeatureVectorWithTile
-from state_approximations.one_d_tc import StateOneDTileCoding
-from sklearn.model_selection import train_test_split
+
 from algorithms.optimal_algorithm import *
 
 def plot_reward(rewards, filename):
@@ -134,6 +138,29 @@ def run_actor_critic_eligibility_trace_tc(env, train, test):
     print("======================")
     return get_metrics(test, 0, rewards, bhr, "experiments/graphs/actor_critic_eligibility_trace.png")
 
+def run_actor_critic_eligibility_trace_linear(env, train, test):
+    print("Running actor critic with eligibility traces linear")
+    # Actor critic with neural network and eligibility traces
+    gamma = 1
+    alpha_theta = 1e-3
+    alpha_w = 1e-3
+    lambda_theta = 0.8
+    lamdba_w = 0.8
+    V = LinearStateApproximation(5, alpha_w)
+    pi = LinearPolicyApproximation(5, 2, alpha_theta)
+    actor_critic_eligibility_trace_linear(env, gamma,
+                                          alpha_theta, alpha_w,
+                                          lambda_theta, lamdba_w,
+                                          V, pi,
+                                          train)
+    rewards, bhr = actor_critic_eligibility_trace_linear(env, gamma,
+                                                         alpha_theta, alpha_w,
+                                                         lambda_theta, lamdba_w,
+                                                         V, pi,
+                                                         test)
+    print("======================")
+    return get_metrics(test, 0, rewards, bhr, "experiments/graphs/actor_critic_eligibility_trace_linear.png")
+
 def run_actor_critic_eligibility_trace_nn(env, train, test):
     print("Running actor critic with eligibility traces nn")
     # Actor critic with neural network and eligibility traces
@@ -142,7 +169,7 @@ def run_actor_critic_eligibility_trace_nn(env, train, test):
     alpha_w = 1e-3
     lambda_theta = 0.8
     lamdba_w = 0.8
-    V = LinearStateApproximation(5, alpha_w)
+    V = NNStateApproximation(5, alpha_w)
     pi = LinearPolicyApproximation(5, 2, alpha_theta)
     actor_critic_eligibility_trace_nn(env, gamma,
                                       alpha_theta, alpha_w,
@@ -236,14 +263,14 @@ if __name__ == "__main__":
 
     policies = ["LRU"]
     env = CacheEnv(policies, cache_size=20)
-    bhr_metrics = []
-    for r in range(num_repetitions):
-        print("Repetion : ", r)
-        train, test = train_test_split(episodes, test_size=0.2)
-        bhr_metrics.append(semi_gradient_n_step_sarsa_with_tc(env, train, test))
-        print("==========================")
-    print("bhr_metrics : ", bhr_metrics)
-    print("Average bhr : ", np.mean(bhr_metrics))
+    # bhr_metrics = []
+    # for r in range(num_repetitions):
+    #     print("Repetion : ", r)
+    #     train, test = train_test_split(episodes, test_size=0.2)
+    #     bhr_metrics.append(semi_gradient_n_step_sarsa_with_tc(env, train, test))
+    #     print("==========================")
+    # print("bhr_metrics : ", bhr_metrics)
+    # print("Average bhr : ", np.mean(bhr_metrics))
 
     # rewards, bhr = optimal_admission(np.arange(5), 20)
     # print(bhr)
@@ -262,7 +289,7 @@ if __name__ == "__main__":
     #     bhr_metrics["always_evict"].append(run_always_evict(env, train, test))
     #         bhr_metrics["actor_critic_tc"].append(run_actor_critic_eligibility_trace_tc(env, train, test))
     #         bhr_metrics["actor_critic_nn"].append(run_actor_critic_eligibility_trace_nn(env, train, test))
-            bhr_metrics["semi_gradient_sarsa_20"].append(semi_gradient_n_step_sarsa_with_linear_approx(env, train, test, n=20))
+        bhr_metrics["actor_critic_nn"].append(run_actor_critic_eligibility_trace_nn(env, train, test))
     #     bhr_metrics["reinforce"].append(run_reinforce(env, train, test))
     print(bhr_metrics)
     for rl_algo in bhr_metrics:
