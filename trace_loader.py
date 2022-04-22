@@ -1,4 +1,6 @@
 import os
+
+import numpy as np
 import pandas as pd
 import statistics
 
@@ -71,8 +73,13 @@ def get_stats(df):
     last_access_time_mean = statistics.mean(last_access_time)
     last_access_time_stdev = statistics.stdev(last_access_time)
 
-    means = [obj_size_mean, 0, last_access_time_mean, obj_freq_mean, obj_interarrival_time_mean]
-    stddevs = [obj_size_stdev, 1, last_access_time_stdev, obj_freq_stdev, obj_interarrival_time_stdev]
+    #stats for rank
+    ranks = np.arange(len(obj_freq))
+    rank_mean = statistics.mean(ranks)
+    rank_stdev = statistics.stdev(ranks)
+
+    means = [obj_size_mean, 0, last_access_time_mean, obj_freq_mean, obj_interarrival_time_mean, rank_mean]
+    stddevs = [obj_size_stdev, 1, last_access_time_stdev, obj_freq_stdev, obj_interarrival_time_stdev, rank_stdev]
 
     for index, stddev in enumerate(stddevs):
         if(stddev == 0):

@@ -120,6 +120,7 @@ class CacheSim(object):
         self.trace_stddevs = trace_stddevs
 
     def step(self, action, obj):
+        #print("object_freq in step(): {}".format(self.object_frequency))
         req = self.req
         # print(self.req)
         cache_size_online_remain = self.cache_remain
@@ -247,9 +248,17 @@ class CacheSim(object):
             except IndexError:
                 # Unseen objects (not in non_cache or cache) are assigned this recency constant
                 req = cache_unseen_default
+
+        #print("object_freq in get_state: {}".format(self.object_frequency))
+        # sorted_frequency = dict(sorted(self.object_frequency.items(), key=lambda item: item[1]))
+        # rank  = -1
+        # if obj_id in sorted_frequency:
+        #     rank = list(sorted_frequency.keys()).index(obj_id)
         # cache_min_freq = math.inf
-        # for obj_id in self.cache:
-        #     cache_min_freq = min(cache_min_freq, self.object_frequency[obj_id])
+        # for object in self.cache:
+        #     freq = self.object_frequency[object]
+        #     cache_min_freq = min(cache_min_freq, freq)
+        #print("obj_id = {}, rank = {}".format(obj_id, rank))
         state = [obj_size, self.cache_remain, req, self.object_frequency[obj_id],
                  self.object_average_interarrival[obj_id]]
 
