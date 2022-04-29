@@ -51,8 +51,24 @@ class LinearStateApproximation(Baseline):
         self.model.train()
         s = torch.tensor(s)
         pred = self.model(s.float())
-        G = torch.tensor(G, dtype=torch.float32)
+        G = torch.tensor([G], dtype=torch.float32)
         loss = 0.5 * self.loss_fn(pred, G)
         self.optimizer.zero_grad()
         loss.backward()
         self.optimizer.step()
+
+    def return_gradient(self, s):
+        self.model.train()
+        s = torch.tensor(s)
+        pred = self.model(s.float())
+        self.model.zero_grad()
+        pred.backward()
+        grad =  self.model.model.weight.grad.numpy()
+        #print("grad: ", grad)
+        return grad
+
+    def manual_update(self, update_vector):
+        with torch.no_grad():
+            update_vector = torch.tensor(update_vector)
+            self.model.model.weight += update_vector
+            #print("Weights : ", self.model.model[0].weight)
