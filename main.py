@@ -203,16 +203,14 @@ if __name__ == "__main__":
         '-n_steps',
         '--n_steps',
         help='number of steps in sarsa',
-        type=int,
-        default=5
+        type=int
     )
 
     parser.add_argument(
-        '-lam',
-        '--lam',
+        '-lambda',
+        '--lambda',
         help='lambda in sarsa',
-        type=float,
-        default=0.8
+        type=float
     )
 
     parser.add_argument(
