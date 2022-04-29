@@ -1,6 +1,6 @@
 import argparse
 import logging
-
+import numpy as np
 import matplotlib.pyplot as plt
 
 from sklearn.model_selection import train_test_split
@@ -10,6 +10,7 @@ from algorithms.deterministic import always_evict, random_eviction
 from algorithms.semi_gradient_n_step_sarsa_algorithm import semi_gradient_n_step_sarsa, semi_gradient_n_step_sarsa_tc
 from algorithms.actor_critic_eligibility_trace_algorithm_linear import actor_critic_eligibility_trace_linear
 from algorithms.actor_critic_eligibility_trace_algorithm_tc import actor_critic_eligibility_trace_tc
+from algorithms.optimal_algorithm import optimal_admission
 from algorithms.reinforce_algorithm import reinforce
 from algorithms.true_online_sarsa_lambda import TrueOnlineSarsaLambda
 from state_approximations.linear_v_approximation import LinearStateApproximation
@@ -17,10 +18,6 @@ from state_approximations.one_d_tc import StateOneDTileCoding
 from policy_approximations.linear_policy_approximation import LinearPolicyApproximation
 from state_action_approximations.linear_q_approximation import LinearStateActionApproximation
 from state_action_approximations.nn_q_approximation import NeuralNetworkStateActionApproximation
-
-from algorithms.optimal_algorithm import *
-
-
 
 def plot_reward(rewards, filename):
     plt.plot(np.arange(0, len(rewards)), np.cumsum(rewards))
@@ -151,6 +148,12 @@ def run_random_eviction(env, train, test):
     print("======================")
     return get_metrics(test, 0, rewards, bhr, "experiments/graphs/random_eviction_lru.png")
 
+def run_optimal(test, cache_size):
+    print("Running Optimal Policy")
+    rewards, bhr = optimal_admission(episodes=test, cache_size=cache_size)
+    print("======================")
+    return get_metrics(test, 0, rewards, bhr, "experiments/graphs/optimal_algorithm.png")
+
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='RL CaR')
     parser.add_argument(
@@ -226,7 +229,8 @@ if __name__ == "__main__":
                      "run_random_eviction" : run_random_eviction,
                      "run_always_evict": run_always_evict,
                      "run_n_step_sarsa_nn" : run_n_step_sarsa_nn,
-                     "run_n_step_sarsa_linear" : run_n_step_sarsa_linear}
+                     "run_n_step_sarsa_linear" : run_n_step_sarsa_linear,
+                     "run_optimal" : run_optimal}
 
     logging.basicConfig(level=logging.INFO,
                        datefmt='%Y-%m-%d %H:%M:%S', handlers=[
@@ -242,11 +246,13 @@ if __name__ == "__main__":
         if function_name.startswith("run_n"):
             n =args.n_steps
             bhr_metrics.append(function_dict[function_name](env, train, test, n))
+        elif function_name.startswith("run_optimal"):
+            bhr_metrics.append(function_dict[function_name](test, cache_size))
         else:
             bhr_metrics.append(function_dict[function_name](env, train, test))
     print("bhr_metrics", bhr_metrics)
     mean_bhr = np.mean(np.array(bhr_metrics))
     print("mean_bhr = ", mean_bhr)
-    log_string = "args , bhr_metrics = {}, mean_bhr = {}".format(', '.join(str(e) for e in bhr_metrics), str(mean_bhr))
+    log_string = "args  = {}, bhr_metrics = {}, mean_bhr = {}".format(args, ', '.join(str(e) for e in bhr_metrics), str(mean_bhr))
     logging.info(log_string)
 

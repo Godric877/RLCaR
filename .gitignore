@@ -29,6 +29,8 @@ MANIFEST
 trace/
 .idea/
 rlcar/
+logs/
+.DS_Store
 
 # PyInstaller
 #  Usually these files are written by a python script from a template
