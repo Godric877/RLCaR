@@ -1,0 +1,21 @@
+# osascript -e 'tell application "Terminal" to do script "cd /Users/syamantak/Desktop/everything/UTAustin/Spring2022/CS394R_ReinforcementLearning/Project/RLCaR && /usr/local/bin/python3.9 main.py -cs 50 -rl random_eviction"' &
+# osascript -e 'tell application "Terminal" to do script "cd /Users/syamantak/Desktop/everything/UTAustin/Spring2022/CS394R_ReinforcementLearning/Project/RLCaR && /usr/local/bin/python3.9 main.py -cs 75 -rl random_eviction"' &
+# osascript -e 'tell application "Terminal" to do script "cd /Users/syamantak/Desktop/everything/UTAustin/Spring2022/CS394R_ReinforcementLearning/Project/RLCaR && /usr/local/bin/python3.9 main.py -cs 100 -rl random_eviction"'
+
+# osascript -e 'tell application "Terminal" to do script "cd /Users/syamantak/Desktop/everything/UTAustin/Spring2022/CS394R_ReinforcementLearning/Project/RLCaR && /usr/local/bin/python3.9 main.py -cs 10 -rl optimal"' &
+# osascript -e 'tell application "Terminal" to do script "cd /Users/syamantak/Desktop/everything/UTAustin/Spring2022/CS394R_ReinforcementLearning/Project/RLCaR && /usr/local/bin/python3.9 main.py -cs 20 -rl optimal"' &
+# osascript -e 'tell application "Terminal" to do script "cd /Users/syamantak/Desktop/everything/UTAustin/Spring2022/CS394R_ReinforcementLearning/Project/RLCaR && /usr/local/bin/python3.9 main.py -cs 50 -rl optimal"' &
+# osascript -e 'tell application "Terminal" to do script "cd /Users/syamantak/Desktop/everything/UTAustin/Spring2022/CS394R_ReinforcementLearning/Project/RLCaR && /usr/local/bin/python3.9 main.py -cs 75 -rl optimal"' &
+# osascript -e 'tell application "Terminal" to do script "cd /Users/syamantak/Desktop/everything/UTAustin/Spring2022/CS394R_ReinforcementLearning/Project/RLCaR && /usr/local/bin/python3.9 main.py -cs 100 -rl optimal"'
+
+# osascript -e 'tell application "Terminal" to do script "cd /Users/syamantak/Desktop/everything/UTAustin/Spring2022/CS394R_ReinforcementLearning/Project/RLCaR && /usr/local/bin/python3.9 main.py -cs 10 -lam 0.1 -rl sarsa_lambda"' &
+# osascript -e 'tell application "Terminal" to do script "cd /Users/syamantak/Desktop/everything/UTAustin/Spring2022/CS394R_ReinforcementLearning/Project/RLCaR && /usr/local/bin/python3.9 main.py -cs 20 -lam 0.1 -rl sarsa_lambda"' &
+# osascript -e 'tell application "Terminal" to do script "cd /Users/syamantak/Desktop/everything/UTAustin/Spring2022/CS394R_ReinforcementLearning/Project/RLCaR && /usr/local/bin/python3.9 main.py -cs 50 -lam 0.1 -rl sarsa_lambda"' &
+# osascript -e 'tell application "Terminal" to do script "cd /Users/syamantak/Desktop/everything/UTAustin/Spring2022/CS394R_ReinforcementLearning/Project/RLCaR && /usr/local/bin/python3.9 main.py -cs 75 -lam 0.1 -rl sarsa_lambda"' &
+# osascript -e 'tell application "Terminal" to do script "cd /Users/syamantak/Desktop/everything/UTAustin/Spring2022/CS394R_ReinforcementLearning/Project/RLCaR && /usr/local/bin/python3.9 main.py -cs 100 -lam 0.1 -rl sarsa_lambda"'
+
+osascript -e 'tell application "Terminal" to do script "cd /Users/syamantak/Desktop/everything/UTAustin/Spring2022/CS394R_ReinforcementLearning/Project/RLCaR && /usr/local/bin/python3.9 main.py -cs 10 -lam 0.2 -rl sarsa_lambda"' &
+osascript -e 'tell application "Terminal" to do script "cd /Users/syamantak/Desktop/everything/UTAustin/Spring2022/CS394R_ReinforcementLearning/Project/RLCaR && /usr/local/bin/python3.9 main.py -cs 20 -lam 0.2 -rl sarsa_lambda"' &
+osascript -e 'tell application "Terminal" to do script "cd /Users/syamantak/Desktop/everything/UTAustin/Spring2022/CS394R_ReinforcementLearning/Project/RLCaR && /usr/local/bin/python3.9 main.py -cs 50 -lam 0.2 -rl sarsa_lambda"' &
+osascript -e 'tell application "Terminal" to do script "cd /Users/syamantak/Desktop/everything/UTAustin/Spring2022/CS394R_ReinforcementLearning/Project/RLCaR && /usr/local/bin/python3.9 main.py -cs 75 -lam 0.2 -rl sarsa_lambda"' &
+osascript -e 'tell application "Terminal" to do script "cd /Users/syamantak/Desktop/everything/UTAustin/Spring2022/CS394R_ReinforcementLearning/Project/RLCaR && /usr/local/bin/python3.9 main.py -cs 100 -lam 0.2 -rl sarsa_lambda"'
