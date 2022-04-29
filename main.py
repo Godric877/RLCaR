@@ -16,6 +16,7 @@ from algorithms.true_online_sarsa_lambda import TrueOnlineSarsaLambda
 from state_approximations.linear_v_approximation import LinearStateApproximation
 from state_approximations.one_d_tc import StateOneDTileCoding
 from policy_approximations.linear_policy_approximation import LinearPolicyApproximation
+from state_action_approximations.one_d_tc import StateActionOneDTileCoding
 from state_action_approximations.linear_q_approximation import LinearStateActionApproximation
 from state_action_approximations.nn_q_approximation import NeuralNetworkStateActionApproximation
 
@@ -135,6 +136,28 @@ def run_reinforce(env, train, test):
     print("======================")
     return get_metrics(test, 0, rewards, bhr, "experiments/graphs/reinforce.png")
 
+def run_sarsa_lambda(env, train, test, lam):
+    print("Running True Online Sarsa Lambda")
+    # True Online Sarsa Lambda with One Dimensional Tile Coding
+    epsilon = 0.1
+    gamma = 1
+    alpha = 1e-2
+    actions = [0, 1]
+    state_low = np.array([1, 0, 0, 1, 0])
+    state_high = np.array([1, 20, 500, 1200, 500])
+    tile_width = np.array([1, 1, 10, 50, 10])
+    Q = StateActionOneDTileCoding(
+        state_low,
+        state_high,
+        num_tilings=2,
+        tile_width=tile_width,
+        num_actions=len(actions)
+    )
+    TrueOnlineSarsaLambda(env, epsilon, gamma, lam, alpha, Q, train)
+    rewards, bhr = TrueOnlineSarsaLambda(env, epsilon, gamma, lam, alpha, Q, test)
+    print("======================")
+    return get_metrics(test, 0, rewards, bhr, "experiments/graphs/true_online_sarsa_lambda.png")
+
 def run_always_evict(env, train, test):
     print("Running Always Evict")
     rewards, bhr = always_evict(env, test)
@@ -179,13 +202,17 @@ if __name__ == "__main__":
     parser.add_argument(
         '-n_steps',
         '--n_steps',
-        help='number of steps in sarsa'
+        help='number of steps in sarsa',
+        type=int,
+        default=5
     )
 
     parser.add_argument(
-        '-lambda',
-        '--lambda',
-        help='lambda in sarsa'
+        '-lam',
+        '--lam',
+        help='lambda in sarsa',
+        type=float,
+        default=0.8
     )
 
     parser.add_argument(
@@ -211,7 +238,7 @@ if __name__ == "__main__":
     seeds = [10, 20, 30, 40 ,50]
 
     args = parser.parse_args()
-    print(args)
+    print("Arguments ", args)
     num_repetitions = args.num_repetitions
     cache_size = args.cache_size
 
@@ -230,7 +257,8 @@ if __name__ == "__main__":
                      "run_always_evict": run_always_evict,
                      "run_n_step_sarsa_nn" : run_n_step_sarsa_nn,
                      "run_n_step_sarsa_linear" : run_n_step_sarsa_linear,
-                     "run_optimal" : run_optimal}
+                     "run_optimal" : run_optimal,
+                     "run_sarsa_lambda" : run_sarsa_lambda}
 
     logging.basicConfig(level=logging.INFO,
                        datefmt='%Y-%m-%d %H:%M:%S', handlers=[
@@ -248,6 +276,8 @@ if __name__ == "__main__":
             bhr_metrics.append(function_dict[function_name](env, train, test, n))
         elif function_name.startswith("run_optimal"):
             bhr_metrics.append(function_dict[function_name](test, cache_size))
+        elif function_name.startswith("run_sarsa_lambda"):
+            bhr_metrics.append(function_dict[function_name](env, train, test, args.lam))
         else:
             bhr_metrics.append(function_dict[function_name](env, train, test))
     print("bhr_metrics", bhr_metrics)
