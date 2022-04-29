@@ -247,6 +247,6 @@ if __name__ == "__main__":
     print("bhr_metrics", bhr_metrics)
     mean_bhr = np.mean(np.array(bhr_metrics))
     print("mean_bhr = ", mean_bhr)
-    log_string = "args , bhr_metrics = {}, mean_bhr = {}".format(', '.join(str(e) for e in bhr_metrics), str(mean_bhr))
+    log_string = "args  = {}, bhr_metrics = {}, mean_bhr = {}".format(args, ', '.join(str(e) for e in bhr_metrics), str(mean_bhr))
     logging.info(log_string)
 
