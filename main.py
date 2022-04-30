@@ -207,8 +207,8 @@ if __name__ == "__main__":
     )
 
     parser.add_argument(
-        '-lambda',
-        '--lambda',
+        '-lam',
+        '--lam',
         help='lambda in sarsa',
         type=float
     )
@@ -224,6 +224,14 @@ if __name__ == "__main__":
         '--policy',
         help='cache replacement policy space separated',
         default="LRU"
+    )
+
+    parser.add_argument(
+        '-ts',
+        '--test_size',
+        help='test size',
+        type=int,
+        default="10"
     )
 
     parser.add_argument(
@@ -268,7 +276,7 @@ if __name__ == "__main__":
     env = CacheEnv(policies, cache_size=cache_size)
     bhr_metrics = []
     for r in range(num_repetitions):
-        train, test = train_test_split(episodes, test_size=0.33, random_state=seeds[r])
+        train, test = train_test_split(episodes, test_size=args.test_size, random_state=seeds[r])
         if function_name.startswith("run_n"):
             n =args.n_steps
             bhr_metrics.append(function_dict[function_name](env, train, test, n))

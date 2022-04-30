@@ -70,7 +70,7 @@ class TraceSrc(object):
         return self.means, self.stddevs
 
 class CacheSim(object):
-    def __init__(self, cache_size, policy, action_space, state_space, replacement_policies, trace_means, trace_stddevs):
+    def __init__(self, cache_size, policy, action_space, state_space, replacement_policies, trace_means, trace_stddevs, episode_index=0):
         # invariant
         '''
         This is the simulater for the cache.
@@ -94,7 +94,7 @@ class CacheSim(object):
         self.cache = defaultdict(list)  # requested items with caching
         self.cache_pq = []
         # self.lru_cache = LRUCache(self.cache_size)
-        self.agent = ReplacementAgent(capacity=self.cache_size, policies=replacement_policies)
+        self.agent = ReplacementAgent(capacity=self.cache_size, policies=replacement_policies,episode_index=episode_index)
         self.cache_remain = self.cache_size
         self.count_ohr = 0
         self.count_bhr = 0
@@ -104,7 +104,7 @@ class CacheSim(object):
         self.trace_means = trace_means
         self.trace_stddevs = trace_stddevs
 
-    def reset(self, trace_means, trace_stddevs):
+    def reset(self, trace_means, trace_stddevs, episode_index):
         self.req = 0
         self.non_cache = defaultdict(list)
         self.cache = defaultdict(list)
@@ -113,7 +113,7 @@ class CacheSim(object):
         self.count_ohr = 0
         self.count_bhr = 0
         self.size_all = 0
-        self.agent.reset()
+        self.agent.reset(index=episode_index)
         self.object_frequency = Counter()
         self.object_average_interarrival = Counter()
         self.trace_means = trace_means
@@ -308,7 +308,8 @@ class CacheEnv():
                             state_space=self.observation_space,
                             replacement_policies=replacement_policies,
                             trace_means=trace_means,
-                            trace_stddevs=trace_stddevs)
+                            trace_stddevs=trace_stddevs,
+                            episode_index=0)
 
         # reset environment (generate new jobs)
         self.reset(1, 2)
@@ -317,7 +318,7 @@ class CacheEnv():
         #new_trace = np.random.randint(low, high)
         self.src.reset(trace_index)
         trace_means, trace_stddevs = self.src.get_trace_stats()
-        self.sim.reset(trace_means, trace_stddevs)
+        self.sim.reset(trace_means, trace_stddevs, episode_index=trace_index)
         if cache_trace_default == 'test':
             print("New Env Start", trace_index)
         elif cache_trace_default == 'real':

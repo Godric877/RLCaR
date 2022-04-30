@@ -5,9 +5,10 @@ import numpy as np
 from replacement_policies.lru import LRUCache
 from replacement_policies.lfu import LFUCache
 from replacement_policies.fifo import FifoCache
+from utils.weights_logger import WeightLogger
 
 class ReplacementAgent:
-    def __init__(self, capacity, policies):
+    def __init__(self, capacity, policies, episode_index):
         self.capacity = capacity
         self.policies = policies
         self.experts = []
@@ -26,6 +27,9 @@ class ReplacementAgent:
 
         self.weights = np.ones(shape=self.num_experts)
         self.reward = np.zeros(shape=self.num_experts)
+        self.weight_logger = WeightLogger()
+        self.tick = 1
+        self.episode_index = episode_index
 
     def update(self, key: int, obj_size) -> None:
         for index, expert in enumerate(self.experts):
@@ -54,9 +58,15 @@ class ReplacementAgent:
     def weight_update(self):
         for index, expert in enumerate(self.experts):
             self.weights[index] *= math.pow(1 + self.epsilon, self.reward[index])
+        #print("weights = ", self.weights)
+        self.weights = self.weights / np.sum(self.weights)
+        self.weight_logger.update_weights(self.weights, self.tick)
+        self.tick += 1
 
-    def reset(self):
+    def reset(self, index):
         for expert in self.experts:
             expert.reset()
         self.weights = self.weights/np.sum(self.weights)
         self.current_expert = 0
+        self.weight_logger.end(self.episode_index)
+        self.episode_index = index
