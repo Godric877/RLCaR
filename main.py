@@ -184,39 +184,43 @@ if __name__ == "__main__":
         '--num_episodes',
         help='Number of episodes',
         type=int,
-        default=30
+        default=70
     )
     parser.add_argument(
         '-nr',
         '--num_repetitions',
         help='Number of repetitions',
         type=int,
-        default=5
+        default=10
     )
     parser.add_argument(
         '-fa',
         '--function_approximation',
-        help='function_approximation'
+        help='function approximation to use',
+        default='tc'
     )
 
     parser.add_argument(
         '-n_steps',
         '--n_steps',
         help='number of steps in sarsa',
-        type=int
+        type=int,
+        default=2
     )
 
     parser.add_argument(
         '-lam',
         '--lam',
         help='lambda in sarsa',
-        type=float
+        type=float,
+        default=0.5
     )
 
     parser.add_argument(
         '-rl',
         '--rl_algo',
-        help='rl algo to use'
+        help='rl algo to use',
+        default='actor_critic'
     )
 
     parser.add_argument(
@@ -231,7 +235,7 @@ if __name__ == "__main__":
         '--test_size',
         help='test size',
         type=int,
-        default="10"
+        default="20"
     )
 
     parser.add_argument(
@@ -241,7 +245,7 @@ if __name__ == "__main__":
         type=int,
         default="20"
     )
-    seeds = [10, 20, 30, 40 ,50]
+    seeds = [10, 20, 30, 40 ,50, 60, 70, 80, 90, 100]
 
     args = parser.parse_args()
     print("Arguments ", args)
