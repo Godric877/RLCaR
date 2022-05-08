@@ -88,5 +88,16 @@ def get_stats(df):
     return means, stddevs
 
 
+print("running")
+df = load_traces('test', 20, 5)
+obj_freq = Counter()
+for index, row in df.iterrows():
+    obj_freq[row[1]] += 1
+freq = pd.DataFrame.from_records(list(dict(obj_freq).items()), columns=['id','count'])
+file_name = "freq.csv"
+freq.to_csv(file_name, index=False, header=False, sep=",")
+
+
+
 
 

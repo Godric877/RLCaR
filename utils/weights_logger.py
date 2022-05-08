@@ -13,7 +13,7 @@ class WeightLogger():
 
     def end(self, index):
         file = "weights_{}.csv".format(index)
-        print("weights = ", self.weights)
+        #print("weights = ", self.weights)
         with open(file, "w", newline="") as f:
             writer = csv.writer(f)
             writer.writerows(self.weights)
