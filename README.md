@@ -21,7 +21,7 @@ cache traces are generated using a Zip-f distribution, which has been widely use
 in simulations.
 
 ## Environment Setup
-Create a new python environment and install dependencies using `pip install -r requirements.txt`
+Create a new python environment and install dependencies using `pip3 install -r requirements.txt`
 
 ## Instructions to Run
 To run with default arguments : `python3 main.py` 
