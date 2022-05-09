@@ -20,10 +20,10 @@ best expert. Our experiments are based on a simulated environment, where the
 cache traces are generated using a Zip-f distribution, which has been widely used
 in simulations.
 
-##Environment Setup
+## Environment Setup
 Create a new python environment and install dependencies using `pip install -r requirements.txt`
 
-##Instructions to run:
+## Instructions to Run
 To run with default arguments : `python3 main.py` 
 
 Arguments : 
